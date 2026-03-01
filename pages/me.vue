@@ -2,7 +2,7 @@
 import axios from "axios";
 
 definePageMeta({
-  middleware: ["auth"],
+  // middleware: ["auth"],
 });
 
 const { user } = useAuth();
