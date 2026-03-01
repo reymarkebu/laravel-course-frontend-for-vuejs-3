@@ -8,6 +8,7 @@ export const useAuth = () => {
 
     async function getUser(): Promise<User | null> {
 
+        console.log("Fetching user data...");
         if(user.value) return user.value;
 
         try {
@@ -23,6 +24,7 @@ export const useAuth = () => {
                 two_factor_confirmed_at: user.two_factor_confirmed_at ? new Date(user.two_factor_confirmed_at) : null,
             };
         } catch (error) {
+            console.log("No authenticated user found.");
             return null;
         }
         
@@ -40,8 +42,8 @@ export const useAuth = () => {
         useRouter().push("/me");
     }
 
-    //logout
     async function logout() {
+        console.log("Logging out...");
         await axios.post("/api/logout");
         user.value = null;
         useRouter().replace("/login");

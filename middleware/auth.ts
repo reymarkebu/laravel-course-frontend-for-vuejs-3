@@ -1,6 +1,7 @@
 import axios, { AxiosError } from "axios";
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
+    console.log("Auth middleware running...");
     const {user, initUser} = useAuth();
 
     await initUser();
