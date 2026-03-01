@@ -6,19 +6,18 @@ import { FormKitNode } from "@formkit/core";
 
 definePageMeta({
   layout: "centered",
-  middleware: ["guest"],
+  // middleware: ["guest"],
 });
 
 const { login } = useAuth();
+const { handleInvalidForm } = useInvalidForm();
 
 async function handleLogin(payload: LoginPayload, node?: FormKitNode) {
   try {
     await login(payload);
   }
   catch (err) {
-    if(err instanceof AxiosError && err.response?.status == 422 ) {
-      node?.setErrors([], err.response.data.message);
-    }
+    handleInvalidForm(err, node);
   }
 }
 

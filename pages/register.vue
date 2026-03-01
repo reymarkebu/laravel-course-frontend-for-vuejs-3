@@ -15,15 +15,14 @@ const form = ref({
   password_confirmation: "",
 });
 const { register } = useAuth();
+const { handleInvalidForm } = useInvalidForm();
 
 async function handleRegister(payload: RegisterPayLoad, node?: FormKitNode) {
   try {
     await register(payload);
   }
   catch (err) {
-    if(err instanceof AxiosError && err.response?.status == 422 ) {
-      node?.setErrors([], err.response.data.message);
-    }
+    handleInvalidForm(err, node);
   }
 
 }
