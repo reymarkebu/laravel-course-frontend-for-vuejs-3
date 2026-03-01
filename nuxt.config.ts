@@ -9,6 +9,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      apiBase: "http://localhost:8000", // added this one
       appURL: "http://localhost",
     },
   },
