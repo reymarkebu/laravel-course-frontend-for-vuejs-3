@@ -1,26 +1,42 @@
 <script setup lang="ts">
-import axios from "axios";
-import { useRouter } from "vue-router";
+import { AxiosError } from "axios";
 import { useAuth } from "~~/composables/useAuth";
+import { RegisterPayLoad } from "@/types";
+import { FormKitNode } from "@formkit/core";
 
 definePageMeta({
   layout: "centered",
-  middleware: ["guest"],
+  // middleware: ["guest"],
 });
-
 const form = ref({
   name: "",
   email: "",
   password: "",
   password_confirmation: "",
 });
+const { register } = useAuth();
+const { handleInvalidForm } = useInvalidForm();
 
-const {register} = useAuth();
+async function handleRegister(payload: RegisterPayLoad, node?: FormKitNode) {
+  try {
+    await register(payload);
+  }
+  catch (err) {
+    handleInvalidForm(err, node);
+  }
+
+}
 </script>
 <template>
   <div class="register">
     <h1>Register</h1>
-    <form @submit.prevent="register(form)">
+    <FormKit type="form" submit-label="Register" @submit="handleRegister">
+      <FormKit label="Name" name="name" type="text"/>
+      <FormKit label="Email" name="email" type="email"/>
+      <FormKit label="Password" name="password" type="password"/>
+      <FormKit label="Confirm Password" name="password_confirmation" type="password"/>
+    </FormKit>
+    <!-- <form @submit.prevent="register(form)">
       <label>
         <div>Name</div>
         <input type="text"  v-model="form.name"/>
@@ -42,7 +58,7 @@ const {register} = useAuth();
       </label>
 
       <button class="btn">Register</button>
-    </form>
+    </form> -->
 
     <p>
       Already have an account?

@@ -1,31 +1,23 @@
 <script setup lang="ts">
 import { AxiosError } from "axios";
 import { useAuth } from "~~/composables/useAuth";
+import { LoginPayload } from "@/types";
+import { FormKitNode } from "@formkit/core";
 
 definePageMeta({
   layout: "centered",
-  middleware: ["guest"],
+  // middleware: ["guest"],
 });
 
 const { login } = useAuth();
+const { handleInvalidForm } = useInvalidForm();
 
-const form = ref({
-  email: "",
-  password: "",
-});
-
-const errors = ref({
-  email: [],
-  password: [],
-})
-async function handleLogin() {
+async function handleLogin(payload: LoginPayload, node?: FormKitNode) {
   try {
-    await login(form.value);
+    await login(payload);
   }
   catch (err) {
-    if(err instanceof AxiosError && err.response?.status == 422 ) {
-      errors.value = err.response.data.errors;
-    }
+    handleInvalidForm(err, node);
   }
 }
 
@@ -33,7 +25,12 @@ async function handleLogin() {
 <template>
   <div class="login">
     <h1>Login</h1>
-    <form @submit.prevent="handleLogin">
+    <FormKit type="form" submit-label="Login" @submit="handleLogin">
+      <FormKit label="Email" name="email" type="email"/>
+      <FormKit label="Password" name="password" type="password"/>
+    </FormKit>
+
+    <!-- <form @submit.prevent="handleLogin">
       <label>
         <div>Email</div>
         <input type="text" v-model="form.email" />
@@ -46,7 +43,7 @@ async function handleLogin() {
         <div v-for="error in errors.password" :key="error" class="text-red-600">{{ error }}</div>
       </label>
       <button class="btn">Login</button>
-    </form>
+    </form> -->
 
     <p>
       Don't have an account?
