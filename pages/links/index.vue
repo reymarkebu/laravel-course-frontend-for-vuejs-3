@@ -4,7 +4,15 @@ import { TailwindPagination } from 'laravel-vue-pagination';
 import type { PaginatedResponse, Link } from "@/types";
 
 const data = ref<PaginatedResponse<Link> | null>(null);
-const page = ref(useRoute().query.page || 1);
+
+const queries = ref({
+  page: 1,
+  "filter[full_link]": "",
+  ...useRoute().query
+  
+})
+
+
 
 
 await getLinks();
@@ -12,17 +20,17 @@ let links = computed(() => data.value?.data);
 
 
 
-watch(page, async ()=>{
+watch(queries, async ()=>{
   getLinks();
   useRouter().push({
-    query: {
-      page: page.value
-    }
+    query: queries.value
   })
-})
+}, {deep: true});
 
 async function getLinks() {
-  const { data: res } = await axios.get(`/api/links?page=${page.value}`);
+  // @ts-expect-error page is number and that's ok
+  const qs = new URLSearchParams(queries.value).toString();
+  const { data: res } = await axios.get(`/api/links?p${qs}`);
   data.value = res;
 }
 
@@ -36,7 +44,7 @@ definePageMeta({
     <nav class="flex justify-between mb-4 items-center">
       <h1 class="mb-0">My Links</h1>
       <div class="flex items-center">
-        <SearchInput modelValue="" />
+        <SearchInput v-model="queries['filter[full_link]']" />
         <NuxtLink to="/links/create" class="ml-4">
           <IconPlusCircle class="inline" /> Create New
         </NuxtLink>
@@ -90,7 +98,7 @@ definePageMeta({
           </tr>
         </tbody>
       </table>
-      <TailwindPagination :data="data" @pagination-change-page="page = $event"></TailwindPagination>
+      <TailwindPagination :data="data" @pagination-change-page="queries.page = $event"></TailwindPagination>
       <div class="mt-5 flex justify-center"></div>
     </div>
 
