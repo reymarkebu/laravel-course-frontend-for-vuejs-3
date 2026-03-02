@@ -31,6 +31,14 @@ export interface Link {
     updated_at: Date;
 }
 
+export interface RawLink {
+    short_link: string;
+    full_link: string;
+    views: number;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface ErrorResponse {
     message: string;
     errors: Record<string, string[]>;

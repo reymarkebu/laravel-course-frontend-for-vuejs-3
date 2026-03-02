@@ -1,39 +1,50 @@
 <script setup lang="ts">
-import axios from 'axios'; 
+import { TailwindPagination } from 'laravel-vue-pagination';
+import { useLinks } from "~~/composables/useLinks";
+// import { useTimeAgo } from "~~/composables/useTimeAgo";
 
-axios.get("/api/links");
 
-definePageMeta({
-  middleware: ["auth"],
+
+
+const queries = ref({
+  page: 1,
+  "filter[full_link]": "",
+  ...useRoute().query
+  
 });
 
-const links = [
-  {
-    short_link: "234jlsfsf",
-    full_link: "https://vueschool.io",
-    views: 3,
-    id: 1,
-  },
-  {
-    short_link: "adfaowerw",
-    full_link: "https://google.com",
-    views: 1,
-    id: 2,
-  },
-  {
-    short_link: "234sfdjaip",
-    full_link: "https://vuejsnation.com/",
-    views: 0,
-    id: 3,
-  },
-];
+const {data, index: getLinks, destroy } = useLinks({ queries })
+
+
+
+await getLinks();
+let links = computed(() => data.value?.data);
+
+
+
+watch(
+  queries, () => useRouter().push({ query: queries.value }), { deep: true }
+);
+
+definePageMeta({
+  // middleware: ["auth"],
+});
+
+async function handleDelete(id: number) {
+  await destroy(id);
+  if (data.value) {
+    data.value.data = data.value?.data.filter((link) => link.id !== id);
+  }
+
+}
+
 </script>
 <template>
   <div>
     <nav class="flex justify-between mb-4 items-center">
       <h1 class="mb-0">My Links</h1>
       <div class="flex items-center">
-        <SearchInput modelValue="" />
+        <SearchInput v-model="queries['filter[full_link]']" />
         <NuxtLink to="/links/create" class="ml-4">
           <IconPlusCircle class="inline" /> Create New
         </NuxtLink>
@@ -50,13 +61,13 @@ const links = [
             <th class="w-[10%]">Edit</th>
             <th class="w-[10%]">Trash</th>
             <th class="w-[6%] text-center">
-              <button><IconRefresh /></button>
+              <button @click="getLinks"><IconRefresh /></button>
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="link in links">
-            <td>
+            <td :title="`created ${useTimeAgo(link.created_at).value}`">
               <a :href="link.full_link" target="_blank">
                 {{ link.full_link.replace(/^http(s?):\/\//, "") }}</a
               >
@@ -81,12 +92,13 @@ const links = [
               /></NuxtLink>
             </td>
             <td>
-              <button><IconTrash /></button>
+              <button @click="handleDelete(link.id)"><IconTrash /></button>
             </td>
             <td></td>
           </tr>
         </tbody>
       </table>
+      <TailwindPagination :data="data" @pagination-change-page="queries.page = $event"></TailwindPagination>
       <div class="mt-5 flex justify-center"></div>
     </div>
 
