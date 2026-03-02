@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import axios from 'axios'; 
 import { TailwindPagination } from 'laravel-vue-pagination';
-import type { PaginatedResponse, Link } from "@/types";
+import { useLinks } from "~~/composables/useLinks";
+// import { useTimeAgo } from "~~/composables/useTimeAgo";
 
-const data = ref<PaginatedResponse<Link> | null>(null);
+
+
 
 const queries = ref({
   page: 1,
   "filter[full_link]": "",
   ...useRoute().query
   
-})
+});
 
+const {data, index: getLinks } = useLinks({ queries })
 
 
 
@@ -20,19 +22,9 @@ let links = computed(() => data.value?.data);
 
 
 
-watch(queries, async ()=>{
-  getLinks();
-  useRouter().push({
-    query: queries.value
-  })
-}, {deep: true});
-
-async function getLinks() {
-  // @ts-expect-error page is number and that's ok
-  const qs = new URLSearchParams(queries.value).toString();
-  const { data: res } = await axios.get(`/api/links?p${qs}`);
-  data.value = res;
-}
+watch(
+  queries, () => useRouter().push({ query: queries.value }), { deep: true }
+);
 
 definePageMeta({
   // middleware: ["auth"],
@@ -67,7 +59,7 @@ definePageMeta({
         </thead>
         <tbody>
           <tr v-for="link in links">
-            <td>
+            <td :title="`created ${useTimeAgo(link.created_at).value}`">
               <a :href="link.full_link" target="_blank">
                 {{ link.full_link.replace(/^http(s?):\/\//, "") }}</a
               >
