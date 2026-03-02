@@ -21,7 +21,6 @@ export const useLinks = ({ queries = ref({}) }: UseLinksOptions = {}) => {
 
     //get all links
     async function index(qs?: Record<string, string | number>) {
-        console.log("fetching links with queries", { ...queries.value, ...qs });
         qs = { ...queries.value, ...qs };
         // @ts-expect-error page is number and that's ok
         const q = new URLSearchParams(qs).toString();
@@ -49,7 +48,8 @@ export const useLinks = ({ queries = ref({}) }: UseLinksOptions = {}) => {
 
     //update an existing link
     async function update(id: string | number, payload: Partial<Link>) {
-        const { data } = await axios.post<RawLink>(`/${slug}/${id}`, payload);
+        console.log("Updating link with id:", id, "and payload:", payload);
+        const { data } = await axios.put<RawLink>(`/${slug}/${id}`, payload);
         return (item.value = adapter(data));
     }
 

@@ -13,7 +13,7 @@ const queries = ref({
   
 });
 
-const {data, index: getLinks } = useLinks({ queries })
+const {data, index: getLinks, destroy } = useLinks({ queries })
 
 
 
@@ -29,6 +29,14 @@ watch(
 definePageMeta({
   // middleware: ["auth"],
 });
+
+async function handleDelete(id: number) {
+  await destroy(id);
+  if (data.value) {
+    data.value.data = data.value?.data.filter((link) => link.id !== id);
+  }
+
+}
 
 </script>
 <template>
@@ -84,7 +92,7 @@ definePageMeta({
               /></NuxtLink>
             </td>
             <td>
-              <button><IconTrash /></button>
+              <button @click="handleDelete(link.id)"><IconTrash /></button>
             </td>
             <td></td>
           </tr>
